@@ -45,8 +45,9 @@ const UserManagement = () => {
     const fetchUsers = async () => {
       try {
         const res = await getAllUsers();
-        setUsers(res);
-        console.log(res);
+        if (Array.isArray(res)) {
+          setUsers(res);
+        }
       } catch (error) {
         console.log(error);
       }
@@ -107,6 +108,7 @@ const UserManagement = () => {
   const handleUserModal = async (userDetail) => {
     try {
       const res = await getUserById(userDetail.id);
+
       setEmail(res.email);
       setUserName(res.username);
       setRole(res.role);

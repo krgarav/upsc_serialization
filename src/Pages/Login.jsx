@@ -6,9 +6,11 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 const Login = () => {
   const [darkMode, setDarkMode] = useState(true);
+  const [loading, setLoading] = useState(false);
   const emailRef = useRef();
   const passwordRef = useRef();
   const navigate = useNavigate();
+
   // Apply dark mode class to the HTML element
   useEffect(() => {
     const html = document.documentElement;
@@ -20,6 +22,7 @@ const Login = () => {
   }, [darkMode]);
   // Toggle dark mode
   const loginHandler = async (e) => {
+    setLoading(true);
     e.preventDefault();
     const password = passwordRef.current.value;
     const email = emailRef.current.value;
@@ -44,6 +47,8 @@ const Login = () => {
       toast.error(res?.data?.message);
     } catch (error) {
       toast.error("Something went wrong!");
+    } finally {
+      setLoading(false);
     }
   };
   const toggleDarkMode = () => {
@@ -138,8 +143,9 @@ const Login = () => {
               <button
                 type="submit"
                 className="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+                disabled={loading}
               >
-                Sign in
+                {loading ? "Signing in..." : "Sign in"}
               </button>
               <p className="text-sm font-light text-gray-500 dark:text-gray-400">
                 Don’t have an account yet?{" "}
