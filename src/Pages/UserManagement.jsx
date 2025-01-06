@@ -163,8 +163,16 @@ const UserManagement = () => {
 
     try {
       const res = await createUser(obj);
-      toast.success("User created successfully");
-      setIsModalOpen(false);
+      console.log(res)
+      if (res?.status === 200) {
+        toast.success("User created successfully");
+        setIsModalOpen(false);
+        return
+      } else {
+        toast.error(res?.data.message);
+      }
+
+      console.log(res);
     } catch (error) {
       console.log(error);
       toast.error("Failed to create user");
@@ -191,7 +199,7 @@ const UserManagement = () => {
     <>
       <Sidebar />
 
-      <div className="p-4 sm:ml-64 mt-10 min-h-screen flex flex-col">
+      <div className="p-4 sm:ml-64 mt-10  flex flex-col">
         <div className="flex justify-between items-center align-middle">
           <h1 className="text-3xl font-semibold mb-4">User Management</h1>
           {/* Create User Button */}
@@ -204,16 +212,28 @@ const UserManagement = () => {
         </div>
 
         {/* Table for displaying users */}
-        <div className="overflow-x-auto bg-white shadow-md rounded-lg">
+        <div className="overflow-x-auto bg-white shadow-md rounded-lg max-h-[50vh]">
           <table className="min-w-full table-auto">
             <thead className="bg-gray-200">
               <tr>
-                <th className="px-4 py-2 text-left">Sl No.</th>
-                <th className="px-4 py-2 text-left">User Name</th>
-                <th className="px-4 py-2 text-left">Email</th>
-                <th className="px-4 py-2 text-left">Role</th>
-                <th className="px-4 py-2 text-left">Status</th>
-                <th className="px-4 py-2 text-left">Created At</th>
+                <th className="px-4 py-2 text-left sticky top-0 bg-gray-100">
+                  Sl No.
+                </th>
+                <th className="px-4 py-2 text-left sticky top-0 bg-gray-100">
+                  User Name
+                </th>
+                <th className="px-4 py-2 text-left sticky top-0 bg-gray-100">
+                  Email
+                </th>
+                <th className="px-4 py-2 text-left sticky top-0 bg-gray-100">
+                  Role
+                </th>
+                <th className="px-4 py-2 text-left sticky top-0 bg-gray-100">
+                  Status
+                </th>
+                <th className="px-4 py-2 text-left sticky top-0 bg-gray-100">
+                  Created At
+                </th>
               </tr>
             </thead>
             <tbody>{AllUsers}</tbody>
