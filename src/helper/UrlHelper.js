@@ -3,9 +3,6 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 const URL = "http://192.168.1.11:9000";
 export const login = async (body) => {
-  //   const token = localStorage.getItem("token");
-  //   const userInfo = jwtDecode(token);
-  //   const userID = userInfo.userId;
   try {
     const response = await axios.post(`${URL}/api/users/login`, { ...body });
     return response; // return the full response to handle status outside
@@ -121,6 +118,7 @@ export const uploadData = async (formdata) => {
         },
       }
     );
+
     return response.data; // return the full response to handle status outside
   } catch (error) {
     console.error(error);
@@ -173,5 +171,25 @@ export const downloadDataById = async (id, type) => {
       data: error.response ? error.response.data : null,
       headers: error.response ? error.response.headers : null,
     };
+  }
+};
+
+export const getUserAnalytics = async () => {
+  const token = localStorage.getItem("upsctoken");
+
+  try {
+    const response = await axios.get(
+      `${URL}/api/users/analytics`,
+
+      {
+        headers: {
+          token: `${token}`,
+        },
+      }
+    );
+    return response.data; // return the full response to handle status outside
+  } catch (error) {
+    console.error(error);
+    return error.response; // return full error response to handle status outside
   }
 };

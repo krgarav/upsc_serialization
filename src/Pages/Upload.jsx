@@ -40,20 +40,44 @@ const Upload = () => {
     fetchAllData();
   }, [isLoading]);
   const handledTextDownload = async (rowDetail) => {
+    const date = rowDetail.createdAt;
+
     try {
       // console.log(rowDetail.id);
 
       const res = await downloadDataById(rowDetail.id, "text");
-      // Convert response to Blob
-      const blob = new Blob([res], { type: "text/plain" });
+
+      // Extract file name from the "Content-Disposition" header
+      const contentDisposition = res.headers["content-disposition"];
+      let fileName = "output.txt"; // Default file name
+      if (contentDisposition && contentDisposition.includes("attachment")) {
+        const matches = /filename="(.+)"/.exec(contentDisposition);
+        if (matches && matches[1]) {
+          fileName = matches[1];
+        }
+      }
+
+      // Extract the created date from the "Date" header
+      const createdAt = date;
+      let formattedDate = new Date(createdAt); // Convert the date to a Date object
+
+      // Optionally format the date (e.g., 'YYYY-MM-DD')
+      const formattedDateString = formattedDate.toISOString().split("T")[0];
+
+      // You can now use the `formattedDateString` for any further use
+      console.log("File Name:", fileName);
+      console.log("Created At:", formattedDateString);
+
+      // Convert response data to Blob
+      const blob = new Blob([res.data], { type: "text/plain" });
 
       // Create a URL for the Blob
       const url = window.URL.createObjectURL(blob);
 
-      // Create a temporary <a> element to trigger download
+      // Create a temporary <a> element to trigger the download
       const a = document.createElement("a");
       a.href = url;
-      a.download = "output.txt"; // The file name for the downloaded file
+      a.download = fileName; // Use the extracted file name
       document.body.appendChild(a); // Append to DOM
       a.click(); // Trigger download
       a.remove(); // Remove element from DOM
@@ -65,20 +89,43 @@ const Upload = () => {
     }
   };
   const handleCsvDownload = async (rowDetail) => {
+    const date = rowDetail.createdAt;
     try {
       // console.log(rowDetail.id);
 
       const res = await downloadDataById(rowDetail.id, "csv");
-      // Convert response to Blob
-      const blob = new Blob([res], { type: "text/plain" });
+
+      // Extract file name from the "Content-Disposition" header
+      const contentDisposition = res.headers["content-disposition"];
+      let fileName = "output.csv"; // Default file name
+      if (contentDisposition && contentDisposition.includes("attachment")) {
+        const matches = /filename="(.+)"/.exec(contentDisposition);
+        if (matches && matches[1]) {
+          fileName = matches[1];
+        }
+      }
+
+      // Extract the created date from the "Date" header
+      const createdAt = date;
+      let formattedDate = new Date(createdAt); // Convert the date to a Date object
+
+      // Optionally format the date (e.g., 'YYYY-MM-DD')
+      const formattedDateString = formattedDate.toISOString().split("T")[0];
+
+      // You can now use the `formattedDateString` for any further use
+      console.log("File Name:", fileName);
+      console.log("Created At:", formattedDateString);
+
+      // Convert response data to Blob
+      const blob = new Blob([res.data], { type: "text/plain" });
 
       // Create a URL for the Blob
       const url = window.URL.createObjectURL(blob);
 
-      // Create a temporary <a> element to trigger download
+      // Create a temporary <a> element to trigger the download
       const a = document.createElement("a");
       a.href = url;
-      a.download = "output.csv"; // The file name for the downloaded file
+      a.download = fileName; // Use the extracted file name
       document.body.appendChild(a); // Append to DOM
       a.click(); // Trigger download
       a.remove(); // Remove element from DOM
@@ -135,11 +182,19 @@ const Upload = () => {
       </td>
     </tr>
   ));
+
   const handleUploadAndProcess = async () => {
     if (!file) {
       toast.warning("Please select a file to upload");
       return;
     }
+    console.log(file.name);
+    const fileName = file.name;
+    // Remove the extension
+    const fileNameWithoutExtension = fileName.substring(
+      0,
+      fileName.lastIndexOf(".")
+    );
     setIsloading(true);
     const formdata = new FormData();
     formdata.append("file", file);
@@ -154,7 +209,7 @@ const Upload = () => {
       // Create a temporary <a> element to trigger download
       const a = document.createElement("a");
       a.href = url;
-      a.download = "output.txt"; // The file name for the downloaded file
+      a.download = fileNameWithoutExtension + ".txt"; // The file name for the downloaded file
       document.body.appendChild(a); // Append to DOM
       a.click(); // Trigger download
       a.remove(); // Remove element from DOM

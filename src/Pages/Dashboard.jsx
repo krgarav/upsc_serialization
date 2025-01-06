@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "../component/sidebar";
-import { downloadDataById, getAllData } from "../helper/Urlhelper";
+import {
+  downloadDataById,
+  getAllData,
+  getUserAnalytics,
+} from "../helper/Urlhelper";
 function formatDate(dateString) {
   const date = new Date(dateString);
 
@@ -20,10 +24,16 @@ function formatDate(dateString) {
 }
 const Dashboard = () => {
   const [allData, setAllData] = useState([]);
+  const [analyticDetails, setAnalyticDetails] = useState({
+    activeUsers: 0,
+    uploadedFiles: 0,
+    users: 0,
+  });
   useEffect(() => {
     const fetchAllData = async () => {
       try {
         const res = await getAllData();
+
         if (Array.isArray(res)) {
           setAllData(res);
         }
@@ -32,6 +42,17 @@ const Dashboard = () => {
       }
     };
     fetchAllData();
+  }, []);
+
+  useEffect(() => {
+    const fetchUserAnalytics = async () => {
+      try {
+        const res = await getUserAnalytics();
+        setAnalyticDetails(res.analyticsData);
+        console.log(res);
+      } catch (error) {}
+    };
+    fetchUserAnalytics();
   }, []);
   const handledTextDownload = async (rowDetail) => {
     const date = rowDetail.createdAt;
@@ -84,20 +105,43 @@ const Dashboard = () => {
     }
   };
   const handleCsvDownload = async (rowDetail) => {
+    const date = rowDetail.createdAt;
     try {
       // console.log(rowDetail.id);
 
       const res = await downloadDataById(rowDetail.id, "csv");
-      // Convert response to Blob
-      const blob = new Blob([res], { type: "text/plain" });
+
+      // Extract file name from the "Content-Disposition" header
+      const contentDisposition = res.headers["content-disposition"];
+      let fileName = "output.csv"; // Default file name
+      if (contentDisposition && contentDisposition.includes("attachment")) {
+        const matches = /filename="(.+)"/.exec(contentDisposition);
+        if (matches && matches[1]) {
+          fileName = matches[1];
+        }
+      }
+
+      // Extract the created date from the "Date" header
+      const createdAt = date;
+      let formattedDate = new Date(createdAt); // Convert the date to a Date object
+
+      // Optionally format the date (e.g., 'YYYY-MM-DD')
+      const formattedDateString = formattedDate.toISOString().split("T")[0];
+
+      // You can now use the `formattedDateString` for any further use
+      console.log("File Name:", fileName);
+      console.log("Created At:", formattedDateString);
+
+      // Convert response data to Blob
+      const blob = new Blob([res.data], { type: "text/plain" });
 
       // Create a URL for the Blob
       const url = window.URL.createObjectURL(blob);
 
-      // Create a temporary <a> element to trigger download
+      // Create a temporary <a> element to trigger the download
       const a = document.createElement("a");
       a.href = url;
-      a.download = "output.csv"; // The file name for the downloaded file
+      a.download = fileName; // Use the extracted file name
       document.body.appendChild(a); // Append to DOM
       a.click(); // Trigger download
       a.remove(); // Remove element from DOM
@@ -168,15 +212,21 @@ const Dashboard = () => {
         <div className="grid grid-cols-3 gap-6 my-6">
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h2 className="text-xl font-semibold">Total File Uploaded</h2>
-            <p className="text-2xl font-bold text-blue-600">1,245</p>
+            <p className="text-2xl font-bold text-blue-600">
+              {analyticDetails.uploadedFiles}
+            </p>
           </div>
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h2 className="text-xl font-semibold">All Users</h2>
-            <p className="text-2xl font-bold text-green-600">325</p>
+            <p className="text-2xl font-bold text-green-600">
+              {analyticDetails.users}
+            </p>
           </div>
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h2 className="text-xl font-semibold">Active Users</h2>
-            <p className="text-2xl font-bold text-purple-600">$12,345</p>
+            <p className="text-2xl font-bold text-purple-600">
+              {analyticDetails.activeUsers}
+            </p>
           </div>
         </div>
         {/* Recent Activity */}
