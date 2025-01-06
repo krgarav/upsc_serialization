@@ -27,36 +27,25 @@ const useTokenRedirect = () => {
             navigate("/login", { replace: true });
           }, 100);
         }
-        if (location.pathname === "/") {
-          navigate("/dashboard");
-        } else {
-          navigate(location.pathname);
-        }
+
         if (decoded.user.role === "admin") {
           if (location.pathname === "/") {
-            navigate("/dashboard");
+            navigate("/admin/dashboard");
           } else {
             navigate(location.pathname);
           }
-          // if (location.pathname.includes("admin")) {
-          // navigate(location.pathname);
-          // } else {
-          //   navigate("/admin/dashboard", { replace: true });
-          // }
+        } else {
+          if (location.pathname === "/") {
+            navigate("/operator/upload");
+          } else {
+            navigate(location.pathname);
+          }
         }
 
-        // else if (decoded.Role === "operator") {
-        //   if (location.pathname.includes("admin")) {
-        //     navigate(location.pathname);
-        //   } else {
-        //     navigate("/admin/index", { replace: true });
-        //   }
-        // } else if (decoded.Role === "Moderator") {
-        //   if (location.pathname.includes("moderator")) {
-        //     navigate(location.pathname);
-        //   } else {
-        //     navigate("/moderator/index", { replace: true });
-        //   }
+        // if (location.pathname.includes("admin")) {
+        //   navigate(location.pathname);
+        // } else {
+        //   navigate("/operator/upload", { replace: true });
         // }
       } catch (error) {
         console.error("Invalid token:", error);
@@ -73,9 +62,9 @@ function App() {
     <>
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/upload" element={<Upload />} />
-        <Route path="/usermanagement" element={<UserManagement />} />
+        <Route path="/admin/dashboard" element={<Dashboard />} />
+        <Route path="/operator/upload" element={<Upload />} />
+        <Route path="/admin/usermanagement" element={<UserManagement />} />
         {/* <Route path="*" element={<Login />} /> */}
       </Routes>
     </>

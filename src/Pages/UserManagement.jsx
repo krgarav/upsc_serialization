@@ -191,7 +191,7 @@ const UserManagement = () => {
     <>
       <Sidebar />
 
-      <div className="p-4 sm:ml-64 mt-10">
+      <div className="p-4 sm:ml-64 mt-10 min-h-screen flex flex-col">
         <div className="flex justify-between items-center align-middle">
           <h1 className="text-3xl font-semibold mb-4">User Management</h1>
           {/* Create User Button */}
@@ -444,6 +444,9 @@ const UserManagement = () => {
           </div>
         )}
         <ToastContainer />
+        <p className="text-center bottom-2 text-gray-500 text-xs">
+          &copy;IOS.All rights reserved.
+        </p>
       </div>
     </>
   );

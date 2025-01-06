@@ -127,3 +127,51 @@ export const uploadData = async (formdata) => {
     return error.response; // return full error response to handle status outside
   }
 };
+
+export const getAllData = async () => {
+  const token = localStorage.getItem("upsctoken");
+
+  try {
+    const response = await axios.get(
+      `${URL}/api/serializes/getall/serialize`,
+
+      {
+        headers: {
+          token: `${token}`,
+        },
+      }
+    );
+    return response.data; // return the full response to handle status outside
+  } catch (error) {
+    console.error(error);
+    return error.response; // return full error response to handle status outside
+  }
+};
+
+export const downloadDataById = async (id, type) => {
+  const token = localStorage.getItem("upsctoken");
+
+  try {
+    const response = await axios.get(
+      `${URL}/api/serializes/download/textreport?serializeId=${id}&fileType=${type}`,
+      {
+        headers: {
+          token: `${token}`,
+        },
+      }
+    );
+    console.log(response);
+    // Return both the data and headers in an object
+    return {
+      data: response.data,
+      headers: response.headers,
+    };
+  } catch (error) {
+    console.error(error);
+    // Return both error data and error headers, if available
+    return {
+      data: error.response ? error.response.data : null,
+      headers: error.response ? error.response.headers : null,
+    };
+  }
+};

@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { jwtDecode } from "jwt-decode";
 const Login = () => {
   const [darkMode, setDarkMode] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -41,8 +42,15 @@ const Login = () => {
       if (res.status === 200) {
         const token = res.data.token;
         localStorage.setItem("upsctoken", token);
+
+        const decoded = jwtDecode(token);
+
+        if (decoded.user.role === "admin") {
+          navigate("/admin/dashboard", { replace: true });
+        } else {
+          navigate("/operator/upload", { replace: true });
+        }
         toast.success(res?.data?.message);
-        navigate("/dashboard", { replace: true });
       }
       toast.error(res?.data?.message);
     } catch (error) {
