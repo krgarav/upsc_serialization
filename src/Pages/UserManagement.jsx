@@ -405,29 +405,29 @@ const UserManagement = () => {
               <div className="flex justify-between mb-2">
                 <button
                   onClick={handleAddUser}
-                  className=" w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                  className=" w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline"
                 >
                   Update Details
                 </button>
               </div>
               <div className="flex justify-between">
-                <button
+                {/* <button
                   onClick={handleDeleteUser}
                   className="bg-orange-400 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                 >
                   Remove
-                </button>
+                </button> */}
                 {currentUserDetail.isRestricted ? (
                   <button
                     onClick={handleUnSuspendUser}
-                    className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                    className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline"
                   >
                     Un Suspend
                   </button>
                 ) : (
                   <button
                     onClick={handleSuspendUser}
-                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline"
                   >
                     Suspend
                   </button>
@@ -435,7 +435,7 @@ const UserManagement = () => {
 
                 <button
                   onClick={() => setProfileModal(false)}
-                  className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                  className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline"
                 >
                   Close
                 </button>

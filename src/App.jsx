@@ -1,4 +1,10 @@
-import { Route, Routes, useNavigate, useLocation } from "react-router-dom";
+import {
+  Route,
+  Routes,
+  useNavigate,
+  useLocation,
+  Navigate,
+} from "react-router-dom";
 import Login from "./Pages/Login";
 import Sidebar from "./component/sidebar";
 import Dashboard from "./Pages/Dashboard";
@@ -6,56 +12,54 @@ import Upload from "./Pages/Upload";
 import { useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 import UserManagement from "./Pages/UserManagement";
+
 const useTokenRedirect = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
     const token = localStorage.getItem("upsctoken");
-    if (token) {
-      try {
-        const decoded = jwtDecode(token);
-        const tokenExp = decoded.exp * 1000; // Convert exp from seconds to milliseconds
-        console.log(decoded);
-        // Get the current time in milliseconds
-        const currentTime = Date.now();
-        if (currentTime >= tokenExp) {
-          console.log("Token has expired");
-          alert("Session has expired, Please login again.");
-          localStorage.clear();
-          setTimeout(() => {
-            navigate("/login", { replace: true });
-          }, 100);
-        }
 
-        if (decoded.user.role === "admin") {
-          if (location.pathname === "/") {
-            navigate("/admin/dashboard");
-          } else {
-            navigate(location.pathname);
-          }
-        } else {
-          if (location.pathname === "/") {
-            navigate("/operator/upload");
-          } else {
-            navigate(location.pathname);
-          }
-        }
+    if (!token) {
+      navigate("/login", { replace: true });
+      return;
+    }
 
-        // if (location.pathname.includes("admin")) {
-        //   navigate(location.pathname);
-        // } else {
-        //   navigate("/operator/upload", { replace: true });
-        // }
-      } catch (error) {
-        console.error("Invalid token:", error);
+    try {
+      const decoded = jwtDecode(token);
+      const tokenExp = decoded.exp * 1000; // Convert expiration time to milliseconds
+      const currentTime = Date.now();
+
+      if (currentTime >= tokenExp) {
+        alert("Session has expired, Please login again.");
+        localStorage.clear();
         navigate("/login", { replace: true });
+        return;
       }
-    } else {
+
+      // Redirect logic based on user role
+      const userRole = decoded.user.role;
+      if (userRole === "admin" && location.pathname.startsWith("/admin")) {
+        return; // Allow access to admin routes
+      }
+      if (
+        userRole === "operator" &&
+        location.pathname.startsWith("/operator")
+      ) {
+        return; // Allow access to operator routes
+      }
+
+      // Default redirection based on role
+      navigate(userRole === "admin" ? "/admin/dashboard" : "/operator/upload", {
+        replace: true,
+      });
+    } catch (error) {
+      console.error("Invalid token:", error);
       navigate("/login", { replace: true });
     }
-  }, [location.pathname]);
+  }, [location.pathname, navigate]);
 };
+
 function App() {
   useTokenRedirect();
   return (
@@ -65,7 +69,8 @@ function App() {
         <Route path="/admin/dashboard" element={<Dashboard />} />
         <Route path="/operator/upload" element={<Upload />} />
         <Route path="/admin/usermanagement" element={<UserManagement />} />
-        {/* <Route path="*" element={<Login />} /> */}
+        {/* Catch-all route for invalid paths */}
+        <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
     </>
   );

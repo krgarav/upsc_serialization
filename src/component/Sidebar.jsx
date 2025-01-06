@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import NightMode from "./Buttons/NightMode";
@@ -8,6 +8,7 @@ const Sidebar = (element) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [role, setRole] = useState(null);
   const [user, setUser] = useState(null);
+  const dropdownRef = useRef(null);
   // State to manage the theme (light or dark)
   const [isDarkMode, setIsDarkMode] = useState(true);
   const navigate = useNavigate();
@@ -20,9 +21,29 @@ const Sidebar = (element) => {
     setDropdownOpen(!dropdownOpen);
   };
   const logoutHandler = () => {
+    const result = window.confirm("Are you sure you want to Log out?");
+    if (!result) {
+      return;
+    }
     localStorage.clear();
     navigate("/login", { replace: true });
   };
+  // Close dropdown if clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+
+    // Add event listener to the document
+    document.addEventListener("mousedown", handleClickOutside);
+
+    // Cleanup the event listener when the component is unmounted or when dropdownOpen changes
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
   // Effect to apply the theme to the document body
   useEffect(() => {
     if (isDarkMode) {
@@ -109,7 +130,8 @@ const Sidebar = (element) => {
                 </button>
                 {dropdownOpen && (
                   <div
-                    className="fixed z-50 top-10 right-10 text-base list-none bg-white divide-y divide-gray-100 rounded shadow dark:bg-gray-700 dark:divide-gray-600"
+                  ref={dropdownRef} 
+                    className="fixed z-50 top-12 right-10 text-base list-none bg-white divide-y divide-gray-100 rounded shadow dark:bg-gray-700 dark:divide-gray-600"
                     id="dropdown-user"
                   >
                     <div className="px-4 py-3" role="none">
@@ -127,15 +149,6 @@ const Sidebar = (element) => {
                       </p>
                     </div>
                     <ul className="py-1" role="none">
-                      <li>
-                        <a
-                          href="#"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
-                          role="menuitem"
-                        >
-                          Dashboard
-                        </a>
-                      </li>
                       <li>
                         <a
                           onClick={logoutHandler}

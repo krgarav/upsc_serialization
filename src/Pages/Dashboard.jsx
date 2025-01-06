@@ -60,19 +60,20 @@ const Dashboard = () => {
     try {
       // console.log(rowDetail.id);
 
-      const res = await downloadDataById(rowDetail.id, "text");
+      const res = await downloadDataById(rowDetail.id, "pdf");
 
       // Extract file name from the "Content-Disposition" header
       const contentDisposition = res.headers["content-disposition"];
-      let fileName = "output.txt"; // Default file name
-      console.log(res);
+      let fileName = "output.pdf"; // Default file name
+
       if (contentDisposition && contentDisposition.includes("attachment")) {
         const matches = /filename="(.+)"/.exec(contentDisposition);
         if (matches && matches[1]) {
           fileName = matches[1];
         }
       }
-
+      const parts = fileName.split("-");
+      const newFileName = `${parts[0]}-${parts[1]}.pdf`;
       // Extract the created date from the "Date" header
       const createdAt = date;
       let formattedDate = new Date(createdAt); // Convert the date to a Date object
@@ -93,7 +94,7 @@ const Dashboard = () => {
       // Create a temporary <a> element to trigger the download
       const a = document.createElement("a");
       a.href = url;
-      a.download = fileName; // Use the extracted file name
+      a.download = newFileName; // Use the extracted file name
       document.body.appendChild(a); // Append to DOM
       a.click(); // Trigger download
       a.remove(); // Remove element from DOM
@@ -120,7 +121,8 @@ const Dashboard = () => {
           fileName = matches[1];
         }
       }
-
+      const parts = fileName.split("-");
+      const newFileName = `${parts[0]}-${parts[1]}.csv`;
       // Extract the created date from the "Date" header
       const createdAt = date;
       let formattedDate = new Date(createdAt); // Convert the date to a Date object
@@ -141,7 +143,7 @@ const Dashboard = () => {
       // Create a temporary <a> element to trigger the download
       const a = document.createElement("a");
       a.href = url;
-      a.download = fileName; // Use the extracted file name
+      a.download = newFileName; // Use the extracted file name
       document.body.appendChild(a); // Append to DOM
       a.click(); // Trigger download
       a.remove(); // Remove element from DOM
@@ -184,17 +186,36 @@ const Dashboard = () => {
       <td className="px-4 py-2">
         <button
           onClick={() => handledTextDownload(user)}
-          className="flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white font-medium rounded-md shadow hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="flex items-center space-x-2 px-4 py-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-lg shadow-lg hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition duration-300"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path d="M8 2a2 2 0 00-2 2v12a2 2 0 002 2h4a2 2 0 002-2V4a2 2 0 00-2-2H8zM6 4a4 4 0 014-4h4a4 4 0 014 4v12a4 4 0 01-4 4H8a4 4 0 01-4-4V4z" />
-          </svg>
-          <span>TXT</span>
+          <div className="flex items-center justify-center w-8 h-8 bg-red-500 rounded-full shadow-md">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 text-white"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path d="M6 2C4.895 2 4 2.895 4 4v16c0 1.105.895 2 2 2h12c1.105 0 2-.895 2-2V8.414c0-.53-.21-1.04-.586-1.414l-5-5C14.04 2.21 13.53 2 13 2H6z" />
+
+              <path
+                d="M14 3.414L18.586 8H14V3.414z"
+                className="text-gray-300"
+              />
+
+              <text
+                x="50%"
+                y="65%"
+                textAnchor="middle"
+                fontSize="9"
+                fontWeight="bold"
+                fill="white"
+                className="pointer-events-none"
+              >
+                PDF
+              </text>
+            </svg>
+          </div>
+          <span className="text-sm font-medium"> PDF</span>
         </button>
       </td>
     </tr>

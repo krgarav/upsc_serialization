@@ -4,7 +4,12 @@ import UploadBtn from "../component/Buttons/UploadBtn";
 import { useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { downloadDataById, getAllData, uploadData } from "../helper/Urlhelper";
+import {
+  checkData,
+  downloadDataById,
+  getAllData,
+  uploadData,
+} from "../helper/Urlhelper";
 function formatDate(dateString) {
   const date = new Date(dateString);
 
@@ -26,6 +31,7 @@ const Upload = () => {
   const [file, setFile] = useState(null);
   const [allData, setAllData] = useState([]);
   const [isLoading, setIsloading] = useState(false);
+  const [resetSignal, setResetSignal] = useState(false);
   useEffect(() => {
     const fetchAllData = async () => {
       try {
@@ -45,18 +51,19 @@ const Upload = () => {
     try {
       // console.log(rowDetail.id);
 
-      const res = await downloadDataById(rowDetail.id, "text");
+      const res = await downloadDataById(rowDetail.id, "pdf");
 
       // Extract file name from the "Content-Disposition" header
       const contentDisposition = res.headers["content-disposition"];
-      let fileName = "output.txt"; // Default file name
+      let fileName = "output.pdf"; // Default file name
       if (contentDisposition && contentDisposition.includes("attachment")) {
         const matches = /filename="(.+)"/.exec(contentDisposition);
         if (matches && matches[1]) {
           fileName = matches[1];
         }
       }
-
+      const parts = fileName.split("-");
+      const newFileName = `${parts[0]}-${parts[1]}.pdf`;
       // Extract the created date from the "Date" header
       const createdAt = date;
       let formattedDate = new Date(createdAt); // Convert the date to a Date object
@@ -77,7 +84,7 @@ const Upload = () => {
       // Create a temporary <a> element to trigger the download
       const a = document.createElement("a");
       a.href = url;
-      a.download = fileName; // Use the extracted file name
+      a.download = newFileName; // Use the extracted file name
       document.body.appendChild(a); // Append to DOM
       a.click(); // Trigger download
       a.remove(); // Remove element from DOM
@@ -104,7 +111,8 @@ const Upload = () => {
           fileName = matches[1];
         }
       }
-
+      const parts = fileName.split("-");
+      const newFileName = `${parts[0]}-${parts[1]}.csv`;
       // Extract the created date from the "Date" header
       const createdAt = date;
       let formattedDate = new Date(createdAt); // Convert the date to a Date object
@@ -125,7 +133,7 @@ const Upload = () => {
       // Create a temporary <a> element to trigger the download
       const a = document.createElement("a");
       a.href = url;
-      a.download = fileName; // Use the extracted file name
+      a.download = newFileName; // Use the extracted file name
       document.body.appendChild(a); // Append to DOM
       a.click(); // Trigger download
       a.remove(); // Remove element from DOM
@@ -138,7 +146,6 @@ const Upload = () => {
   };
   const handleUpload = (file) => {
     setFile(file);
-    console.log(file);
   };
 
   const AllUploadedData = allData.map((user, index) => (
@@ -167,17 +174,36 @@ const Upload = () => {
       <td className="px-4 py-2">
         <button
           onClick={() => handledTextDownload(user)}
-          className="flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white font-medium rounded-md shadow hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="flex items-center space-x-2 px-4 py-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-lg shadow-lg hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition duration-300"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path d="M8 2a2 2 0 00-2 2v12a2 2 0 002 2h4a2 2 0 002-2V4a2 2 0 00-2-2H8zM6 4a4 4 0 014-4h4a4 4 0 014 4v12a4 4 0 01-4 4H8a4 4 0 01-4-4V4z" />
-          </svg>
-          <span>TXT</span>
+          <div className="flex items-center justify-center w-8 h-8 bg-red-500 rounded-full shadow-md">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 text-white"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path d="M6 2C4.895 2 4 2.895 4 4v16c0 1.105.895 2 2 2h12c1.105 0 2-.895 2-2V8.414c0-.53-.21-1.04-.586-1.414l-5-5C14.04 2.21 13.53 2 13 2H6z" />
+
+              <path
+                d="M14 3.414L18.586 8H14V3.414z"
+                className="text-gray-300"
+              />
+
+              <text
+                x="50%"
+                y="65%"
+                textAnchor="middle"
+                fontSize="9"
+                fontWeight="bold"
+                fill="white"
+                className="pointer-events-none"
+              >
+                PDF
+              </text>
+            </svg>
+          </div>
+          <span className="text-sm font-medium"> PDF</span>
         </button>
       </td>
     </tr>
@@ -188,8 +214,19 @@ const Upload = () => {
       toast.warning("Please select a file to upload");
       return;
     }
-    console.log(file.name);
     const fileName = file.name;
+    const res = await checkData(fileName);
+    if (res.isPresent) {
+      const result = window.confirm(
+        "File Already Present. Do you want to continue?"
+      );
+      if (!result) {
+        // setFile(null);
+        // setResetSignal((prev) => !prev);
+        return;
+      }
+    }
+
     // Remove the extension
     const fileNameWithoutExtension = fileName.substring(
       0,
@@ -199,17 +236,25 @@ const Upload = () => {
     const formdata = new FormData();
     formdata.append("file", file);
     try {
-      const res = await uploadData(formdata);
-      // Convert response to Blob
-      const blob = new Blob([res], { type: "text/plain" });
+      const response = await uploadData(formdata);
+      // Extract filename from Content-Disposition header, if present
+      const contentDisposition = response.headers["content-disposition"];
+
+      const matches = /filename="(.+)"/.exec(contentDisposition);
+      const fileName = matches && matches[1] ? matches[1] : "download.pdf";
+
+      const parts = fileName.split("-");
+      const newFileName = `${parts[0]}-${parts[1]}.pdf`;
+      // Create a Blob from the response data
+      const blob = new Blob([response.data], { type: "application/pdf" });
 
       // Create a URL for the Blob
       const url = window.URL.createObjectURL(blob);
 
-      // Create a temporary <a> element to trigger download
+      // Create a temporary <a> element to trigger the download
       const a = document.createElement("a");
       a.href = url;
-      a.download = fileNameWithoutExtension + ".txt"; // The file name for the downloaded file
+      a.download = newFileName; // Use extracted filename or default
       document.body.appendChild(a); // Append to DOM
       a.click(); // Trigger download
       a.remove(); // Remove element from DOM
@@ -238,15 +283,20 @@ const Upload = () => {
               >
                 Upload CSV
               </label>
-              <UploadBtn onChange={handleUpload} />
+              <UploadBtn onChange={handleUpload} resetSignal={resetSignal} />
             </div>
-            <div className="flex items-center  w-1/4 justify-between">
+            <div className="flex items-center w-1/4 justify-between">
               <button
-                className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                className={`w-full py-2 px-4 rounded font-bold focus:outline-none focus:shadow-outline ${
+                  isLoading
+                    ? "bg-gray-400 text-gray-800 cursor-not-allowed"
+                    : "bg-blue-500 hover:bg-blue-700 text-white"
+                }`}
                 type="button"
                 onClick={handleUploadAndProcess}
+                disabled={isLoading}
               >
-                Upload and process
+                {isLoading ? "Processing..." : "Upload and Process"}
               </button>
             </div>
           </form>
@@ -267,7 +317,7 @@ const Upload = () => {
                     Csv File
                   </th>
                   <th className="px-4 py-2 text-left sticky top-0 bg-gray-100">
-                    Text File
+                    Pdf File
                   </th>
                 </tr>
               </thead>

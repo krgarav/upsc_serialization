@@ -1,16 +1,23 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useState } from "react";
 import "./Upload.css";
-const UploadBtn = ({ onChange }) => {
+const UploadBtn = ({ onChange, resetSignal }) => {
   const [fileName, setFileName] = useState("");
   const handleData = (data) => {
-    console.log();
+    if (data === null) {
+      setFileName("");
+      return;
+    }
     const file = data.target.files[0];
 
     setFileName(file.name);
     onChange(data.target.files[0]);
   };
-  console.log(fileName);
+  // Effect to clear fileName when the parent resets the file
+  // useEffect(() => {
+  //   setFileName(""); // Clear the fileName when reset is triggered
+  //   console.log("called");
+  // }, [resetSignal]);
   return (
     /* From Uiverse.io by omar49511 */
     <button className="container-btn-file">

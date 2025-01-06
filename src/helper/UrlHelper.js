@@ -116,10 +116,11 @@ export const uploadData = async (formdata) => {
         headers: {
           token: `${token}`,
         },
+        responseType: "blob", // Important: Set this to handle Blob responses
       }
     );
 
-    return response.data; // return the full response to handle status outside
+    return response; // return the full response to handle status outside
   } catch (error) {
     console.error(error);
     return error.response; // return full error response to handle status outside
@@ -156,14 +157,12 @@ export const downloadDataById = async (id, type) => {
         headers: {
           token: `${token}`,
         },
+        responseType: "blob", // Important: Set this to handle Blob responses
       }
     );
     console.log(response);
     // Return both the data and headers in an object
-    return {
-      data: response.data,
-      headers: response.headers,
-    };
+    return response
   } catch (error) {
     console.error(error);
     // Return both error data and error headers, if available
@@ -187,6 +186,26 @@ export const getUserAnalytics = async () => {
         },
       }
     );
+    return response.data; // return the full response to handle status outside
+  } catch (error) {
+    console.error(error);
+    return error.response; // return full error response to handle status outside
+  }
+};
+
+export const checkData = async (filename) => {
+  const token = localStorage.getItem("upsctoken");
+
+  try {
+    const response = await axios.get(
+      `${URL}/api/serializes/check?filename=${filename}`,
+      {
+        headers: {
+          token: `${token}`,
+        },
+      }
+    );
+
     return response.data; // return the full response to handle status outside
   } catch (error) {
     console.error(error);
