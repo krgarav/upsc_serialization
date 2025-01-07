@@ -163,11 +163,10 @@ const UserManagement = () => {
 
     try {
       const res = await createUser(obj);
-      console.log(res)
-      if (res?.status === 200) {
+      console.log(res);
+      if (res?.isCreated) {
         toast.success("User created successfully");
         setIsModalOpen(false);
-        return
       } else {
         toast.error(res?.data.message);
       }
