@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
-const URL = "http://192.168.1.11:9000";
+const URL = "http://192.168.1.13:7000";
 export const login = async (body) => {
   try {
     const response = await axios.post(`${URL}/api/users/login`, { ...body });
@@ -209,6 +209,6 @@ export const checkData = async (filename) => {
     return response.data; // return the full response to handle status outside
   } catch (error) {
     console.error(error);
-    return error.response; // return full error response to handle status outside
+    return error.response.data; // return full error response to handle status outside
   }
 };

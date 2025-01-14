@@ -4,14 +4,22 @@ import "./Upload.css";
 const UploadBtn = ({ onChange, resetSignal }) => {
   const [fileName, setFileName] = useState("");
   const handleData = (data) => {
-    if (data === null) {
+    if (data === null || data.target.files.length === 0) {
       setFileName("");
       return;
     }
-    const file = data.target.files[0];
 
-    setFileName(file.name);
-    onChange(data.target.files[0]);
+    const files = data.target.files;
+    let fileNames = [];
+
+    // Loop through each selected file and get its name
+    for (let i = 0; i < files.length; i++) {
+      fileNames.push(files[i].name);
+    }
+
+    // Join the file names into a string separated by commas
+    setFileName(fileNames.join(", "));
+    onChange(files); // Pass the files array to onChange or handle accordingly
   };
   // Effect to clear fileName when the parent resets the file
   // useEffect(() => {
@@ -56,6 +64,7 @@ const UploadBtn = ({ onChange, resetSignal }) => {
         accept=".csv"
         name="text"
         type="file"
+        multiple
       />
     </button>
   );
